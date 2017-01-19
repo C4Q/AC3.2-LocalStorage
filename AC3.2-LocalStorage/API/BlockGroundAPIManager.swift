@@ -9,11 +9,6 @@
 import Foundation
 import UIKit
 
-protocol BlockGroundAPIDelegate {
-  func didDownload(_ task: URLSessionDownloadTask, to url: URL)
-  func downloadProgress(_ task: URLSessionDownloadTask) -> Double
-}
-
 struct BlockGroundConstant {
   static let notSet = "Not Set"
   static let baseURL = "https://api.fieldbook.com/v1/"
@@ -75,7 +70,8 @@ internal class BlockGroundAPIManager: NSObject, URLSessionDownloadDelegate {
     
   }
   
-  internal func downloadBlockGround(_ blockground: BlockGround, completion: @escaping (UIImage?)->Void) {
+  // Without the completion handler for downloadTask, we can remove the closure from this function and leave it simply as downloadBlockGround(_:)
+  internal func downloadBlockGround(_ blockground: BlockGround) {
     // define url from blockground model
     let url = URL(string: blockground.imageFullResURL)!
 
@@ -121,12 +117,15 @@ internal class BlockGroundAPIManager: NSObject, URLSessionDownloadDelegate {
   }
   
   func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-    // keep track of periodic downloads
+    // keep track of periodic download
     
-    // check for % completed and print
+    // TODO: what do we do when the nsurl session transfer size is unknown?
+    // TODO: lets display some info at least (MB)
     
-    // what do we do when the nsurl session transfer size is unknown?
-    // lets display some info at least (MB)
+    // 1. Task: Calculater the % of the download completed from the totalBytesWrittn and the
+    //    totalBytesExpectedToWrite (careful of when you perform your type casting..)
+    let progress = (Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)) * 100.0
+    self.downloadDelegate?.downloadProgress(downloadTask, progress: progress)
   }
 
 }

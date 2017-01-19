@@ -12,6 +12,7 @@
 		140452BB1E2D92B5003E13E2 /* BlockGround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140452BA1E2D92B5003E13E2 /* BlockGround.swift */; };
 		140452BE1E2D93D5003E13E2 /* BlockGroundAPIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140452BD1E2D93D5003E13E2 /* BlockGroundAPIManager.swift */; };
 		140452C11E2D9D32003E13E2 /* BlockGroundFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140452C01E2D9D32003E13E2 /* BlockGroundFileManager.swift */; };
+		14CFEBDB1E312A1200BD46CF /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CFEBDA1E312A1200BD46CF /* Protocols.swift */; };
 		14D9F7B81E2AE841003EC24B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D9F7B71E2AE841003EC24B /* AppDelegate.swift */; };
 		14D9F7BF1E2AE841003EC24B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14D9F7BE1E2AE841003EC24B /* Assets.xcassets */; };
 		14D9F7C21E2AE841003EC24B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14D9F7C01E2AE841003EC24B /* LaunchScreen.storyboard */; };
@@ -24,6 +25,7 @@
 		140452BA1E2D92B5003E13E2 /* BlockGround.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BlockGround.swift; path = Model/BlockGround.swift; sourceTree = "<group>"; };
 		140452BD1E2D93D5003E13E2 /* BlockGroundAPIManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BlockGroundAPIManager.swift; path = API/BlockGroundAPIManager.swift; sourceTree = "<group>"; };
 		140452C01E2D9D32003E13E2 /* BlockGroundFileManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BlockGroundFileManager.swift; path = API/BlockGroundFileManager.swift; sourceTree = "<group>"; };
+		14CFEBDA1E312A1200BD46CF /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		14D9F7B41E2AE841003EC24B /* AC3.2-LocalStorage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AC3.2-LocalStorage.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		14D9F7B71E2AE841003EC24B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		14D9F7BE1E2AE841003EC24B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -89,6 +91,15 @@
 			name = Managers;
 			sourceTree = "<group>";
 		};
+		14CFEBDC1E312A1A00BD46CF /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				14CFEBDA1E312A1200BD46CF /* Protocols.swift */,
+			);
+			name = Protocols;
+			path = ..;
+			sourceTree = "<group>";
+		};
 		14D9F7AB1E2AE841003EC24B = {
 			isa = PBXGroup;
 			children = (
@@ -111,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				14D9F7B71E2AE841003EC24B /* AppDelegate.swift */,
+				14CFEBDC1E312A1A00BD46CF /* Protocols */,
 				140452BC1E2D92B9003E13E2 /* Model */,
 				140452B51E2D8F19003E13E2 /* View Controllers */,
 				140452BF1E2D93D9003E13E2 /* Managers */,
@@ -262,6 +274,7 @@
 			files = (
 				140452B41E2D8F13003E13E2 /* LocalFilesViewController.swift in Sources */,
 				140452B81E2D903A003E13E2 /* LocalStorageHelpers.swift in Sources */,
+				14CFEBDB1E312A1200BD46CF /* Protocols.swift in Sources */,
 				140452C11E2D9D32003E13E2 /* BlockGroundFileManager.swift in Sources */,
 				140452BE1E2D93D5003E13E2 /* BlockGroundAPIManager.swift in Sources */,
 				140452BB1E2D92B5003E13E2 /* BlockGround.swift in Sources */,

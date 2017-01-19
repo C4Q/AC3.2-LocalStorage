@@ -11,7 +11,10 @@ import SnapKit
 
 class LocalFilesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, BlockGroundAPIDelegate {
   private let cellIdentifier: String = "LocalFileCellIdentifier"
-  private var directoryItems: [URL]? 
+  private var directoryItems: [URL]?
+  
+  // 1. Create an instance of a progress view
+  var downloadProgressBar: UIProgressView = UIProgressView(progressViewStyle: .default)
   
   // MARK: - View lifecycle
   override func viewDidLoad() {
@@ -37,11 +40,15 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
 
       // download blockground images
       guard let lastBlock = blockground?.last else { return }
-      BlockGroundAPIManager.shared.downloadBlockGround(lastBlock, completion: { (image: UIImage?) in
-        guard let validImage = image else { return }
-        // do something with image?
-        dump(validImage)
-      })
+      BlockGroundAPIManager.shared.downloadBlockGround(lastBlock)
+      
+      // We changed the function to not use a closure. We're now tracking download progress 
+      // and info from delegate functions
+//        , completion: { (image: UIImage?) in
+//        guard let validImage = image else { return }
+//        // do something with image?
+//        dump(validImage)
+//      })
     }
   }
   
@@ -53,10 +60,17 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
     print(url)
   }
   
-  // we need to update this to something different
-  func downloadProgress(_ task: URLSessionDownloadTask) -> Double {
-    return 0.0
+  func downloadProgress(_ task: URLSessionDownloadTask, progress: Double) {
+    let formattedString = String(format: "%.1f", progress)
+    
+    
+    // Task: Pass this progress value to your progress view to show a visual indicator of
+    //       download progress
+    print(formattedString)
+    
+    self.downloadProgressBar.setProgress(Float(progress / 100.0), animated: true)
   }
+  
   
   // MARK: - Setup
   private func configureConstraints() {
@@ -72,6 +86,10 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
       view.top.equalTo(previewView.snp.bottom)
       view.leading.trailing.bottom.equalToSuperview()
     }
+    
+    downloadProgressBar.snp.makeConstraints { (view) in
+      view.leading.trailing.bottom.equalToSuperview()
+    }
   }
   
   private func setupViewHierarchy() {
@@ -85,6 +103,9 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
     
     // register tableview
     self.localFilesTable.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
+    
+    // add progress view 
+    self.previewView.addSubview(downloadProgressBar)
   }
   
   
