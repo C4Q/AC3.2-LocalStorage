@@ -19,6 +19,7 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
   // MARK: - View lifecycle
   override func viewDidLoad() {
     super.viewDidLoad()
+    self.previewView.backgroundColor = .orange
     
     setupViewHierarchy()
     configureConstraints()
@@ -58,17 +59,68 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
     
     print(task.description)
     print(url)
+    
+    
+    // TASK: Now that the download has completed, use the URL for the finished
+    //       temp file to create a UIImage. That code we already explored in the 
+    //       completion handler in the BlockGroundAPIManager call for downloading
+    //       a BlockGround
+    
+    // i.e, we should be able to call:
+    // BlockGroundFileManager.shared.save(image)
+    
+    
+    // Animate some of these changes to the progress view
+    DispatchQueue.main.async {
+      // 1. Class methods on UIView allow for animating a select set of a view's properties:
+      // see https://developer.apple.com/library/content/documentation/WindowsViews/Conceptual/ViewPG_iPhoneOS/AnimatingViews/AnimatingViews.html
+      // (frames, bounds, background color, transform, content, center & alpha)
+      UIView.animate(withDuration: 1.75, animations: {
+        // 2. tint color change occurs immediately despite the animation block
+        //    tint color is not an animatable property
+        self.downloadProgressBar.tintColor = .green
+        
+        // 3. however, alpha is animatable. here we go from 1.0->0.0 aka Visible -> Invisible
+        self.downloadProgressBar.alpha = 0.0
+        
+        // 4. background color is also animatable
+        self.previewView.backgroundColor = .purple
+        
+        // 5. We can change the transforms in three categories:
+        //    - Scale: Size in the X & Y
+        //    - Rotation: Rotating a view in Radians! 
+        //    - Translation: Move in the X/Y axis by a value
+        self.downloadProgressBar.transform = CGAffineTransform(rotationAngle:  CGFloat.pi)
+//        self.downloadProgressBar.transform = CGAffineTransform(scaleX: 0.00001, y: 10.5)
+//        self.downloadProgressBar.transform = CGAffineTransform(translationX: 200.0, y: -50.0)
+        
+      }, completion: { (complete) in
+        
+        // completion blocks are run following the animations
+        if complete {
+//          print("Animations completed, do other stuff")
+          
+          // 6. In a completion block, we can add additional animation
+          UIView.animate(withDuration: 1.25, animations: {
+            self.downloadProgressBar.alpha = 1.0
+            self.downloadProgressBar.transform = CGAffineTransform.identity
+          })
+          
+        }
+      })
+      
+    }
   }
   
   func downloadProgress(_ task: URLSessionDownloadTask, progress: Double) {
     let formattedString = String(format: "%.1f", progress)
     
-    
     // Task: Pass this progress value to your progress view to show a visual indicator of
     //       download progress
     print(formattedString)
-    
-    self.downloadProgressBar.setProgress(Float(progress / 100.0), animated: true)
+    DispatchQueue.main.async {
+      self.downloadProgressBar.setProgress(Float(progress / 100.0), animated: true)
+    }
   }
   
   
@@ -89,6 +141,7 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
     
     downloadProgressBar.snp.makeConstraints { (view) in
       view.leading.trailing.bottom.equalToSuperview()
+      view.height.equalTo(20.0)
     }
   }
   
