@@ -40,27 +40,20 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
       }
 
       // download blockground images
-      guard let lastBlock = blockground?.last else { return }
-      BlockGroundAPIManager.shared.downloadBlockGround(lastBlock)
+//      guard let lastBlock = blockground?.last else { return }
+//      BlockGroundAPIManager.shared.downloadBlockGround(lastBlock)
       
-      // We changed the function to not use a closure. We're now tracking download progress 
-      // and info from delegate functions
-//        , completion: { (image: UIImage?) in
-//        guard let validImage = image else { return }
-//        // do something with image?
-//        dump(validImage)
-//      })
+      // let's now try downloading all of the images
+      guard let validBlockGrounds = blockground else { return }
+      validBlockGrounds.forEach({ blockground in
+        BlockGroundAPIManager.shared.downloadBlockGround(blockground)
+      })
     }
   }
   
   
   // MARK: - BlockGroundAPI Delegate 
   func didDownload(_ task: URLSessionDownloadTask, to url: URL) {
-    
-    print(task.description)
-    print(url)
-    
-    
     // TASK: Now that the download has completed, use the URL for the finished
     //       temp file to create a UIImage. That code we already explored in the 
     //       completion handler in the BlockGroundAPIManager call for downloading
@@ -69,6 +62,32 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
     // i.e, we should be able to call:
     // BlockGroundFileManager.shared.save(image)
     
+    guard
+      let imageData = try? Data(contentsOf: url),
+      let imageFromData = UIImage(data: imageData)
+    else { return }
+    
+    BlockGroundFileManager.shared.save(image: imageFromData, name: task.taskDescription!, type: "jpg") {
+      
+      DispatchQueue.main.async {
+        self.localFilesTable.reloadData()
+      }
+    }
+  }
+  
+  func downloadProgress(_ task: URLSessionDownloadTask, progress: Double) {
+    let formattedString = String(format: "%.1f", progress)
+    
+    // Task: Pass this progress value to your progress view to show a visual indicator of
+    //       download progress
+    print(formattedString)
+    DispatchQueue.main.async {
+      self.downloadProgressBar.setProgress(Float(progress / 100.0), animated: true)
+    }
+  }
+  
+  // MARK: - Animation
+  func animateCompleteDownload() {
     
     // Animate some of these changes to the progress view
     DispatchQueue.main.async {
@@ -88,17 +107,17 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
         
         // 5. We can change the transforms in three categories:
         //    - Scale: Size in the X & Y
-        //    - Rotation: Rotating a view in Radians! 
+        //    - Rotation: Rotating a view in Radians!
         //    - Translation: Move in the X/Y axis by a value
         self.downloadProgressBar.transform = CGAffineTransform(rotationAngle:  CGFloat.pi)
-//        self.downloadProgressBar.transform = CGAffineTransform(scaleX: 0.00001, y: 10.5)
-//        self.downloadProgressBar.transform = CGAffineTransform(translationX: 200.0, y: -50.0)
+        //        self.downloadProgressBar.transform = CGAffineTransform(scaleX: 0.00001, y: 10.5)
+        //        self.downloadProgressBar.transform = CGAffineTransform(translationX: 200.0, y: -50.0)
         
       }, completion: { (complete) in
         
         // completion blocks are run following the animations
         if complete {
-//          print("Animations completed, do other stuff")
+          //          print("Animations completed, do other stuff")
           
           // 6. In a completion block, we can add additional animation
           UIView.animate(withDuration: 1.25, animations: {
@@ -109,17 +128,6 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
         }
       })
       
-    }
-  }
-  
-  func downloadProgress(_ task: URLSessionDownloadTask, progress: Double) {
-    let formattedString = String(format: "%.1f", progress)
-    
-    // Task: Pass this progress value to your progress view to show a visual indicator of
-    //       download progress
-    print(formattedString)
-    DispatchQueue.main.async {
-      self.downloadProgressBar.setProgress(Float(progress / 100.0), animated: true)
     }
   }
   
@@ -181,12 +189,31 @@ class LocalFilesViewController: UIViewController, UITableViewDataSource, UITable
   }
   
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    
+    guard let cell = tableView.cellForRow(at: indexPath) else { return }
+    guard let locatedImage = BlockGroundFileManager.shared.image(named: cell.textLabel!.text!) else { return }
+    
+    DispatchQueue.main.async {
+      UIView.animate(withDuration: 0.05, animations: {
+        self.previewView.alpha = 0.0
+      }){ complete in
+        if complete {
+          self.previewView.image = locatedImage
+          
+          UIView.animate(withDuration: 0.10, animations: {
+            self.previewView.alpha = 1.0
+          })
+        }
+      }
+      
+    }
   }
   
   // MARK: - Lazy Inits
-  internal lazy var previewView: UIView = {
-    let view: UIView = UIView()
+  internal lazy var previewView: UIImageView = {
+    let view: UIImageView = UIImageView()
     view.backgroundColor = .gray
+    view.contentMode = .scaleAspectFit
     return view
   }()
   

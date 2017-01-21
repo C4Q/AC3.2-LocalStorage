@@ -66,7 +66,7 @@ internal class BlockGroundAPIManager: NSObject, URLSessionDownloadDelegate {
       } catch {
         print(error.localizedDescription)
       }
-    }.resume()
+      }.resume()
     
   }
   
@@ -74,45 +74,52 @@ internal class BlockGroundAPIManager: NSObject, URLSessionDownloadDelegate {
   internal func downloadBlockGround(_ blockground: BlockGround) {
     // define url from blockground model
     let url = URL(string: blockground.imageFullResURL)!
-
+    
     // create download task for session.. with or without handler?
-    
+    // Giving the downloadTask a completion handler results in the delegate functions of URLSessionDownloadDelegate to
+    // be ignored completely, even if you've set up the delegation properly.
+    // To use the delegate functions, you must use a non-completion block version of a URLSessionDownloadTask function
     let downloadTask = session.downloadTask(with: url)
+    
+    // give task a description so that we can identify it later
     downloadTask.taskDescription = blockground.shortName
-    downloadTask.resume()
+    downloadTask.resume() // start task
+  }
+  
+  // For easier reading/comparison, I added the completion handler version as its own function
+  internal func downloadBlockGround(_ blockground: BlockGround, completion: @escaping (UIImage?)->Void) {
+    // define url from blockground model
+    let url = URL(string: blockground.imageFullResURL)!
     
-//    session.downloadTask(with: url)
-//    { (url: URL?, response: URLResponse?, error: Error?) in
-//      
-//      if error != nil {
-//        print(error!.localizedDescription)
-//      }
-//      
-//      if url != nil {
-//        
-//        do {
-//          let imageData = try Data(contentsOf: url!)
-//          if let imageFromData = UIImage(data: imageData) {
-//            completion(imageFromData)
-//          }
-//        }
-//        catch {
-//          print(error.localizedDescription)
-//        }
-//        
-//      }
-//      
-//    }.resume()
-    
-    // give task a description
-    
-    // start task
+    session.downloadTask(with: url) { (url: URL?, response: URLResponse?, error: Error?) in
+      
+      if error != nil {
+        print(error!.localizedDescription)
+      }
+      
+      if url != nil {
+        
+        do {
+          let imageData = try Data(contentsOf: url!)
+          if let imageFromData = UIImage(data: imageData) {
+            completion(imageFromData)
+          }
+        }
+        catch {
+          print(error.localizedDescription)
+        }
+        
+      }
+      
+      }.resume()
   }
   
   
-  // MARK: - Download Delegate 
+  // MARK: - Download Delegate
   func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
     // check for finished download
+    
+    // In this case, we just want to forward along this information to the downloadDelegate.
     self.downloadDelegate?.didDownload(downloadTask, to: location)
   }
   
@@ -121,11 +128,18 @@ internal class BlockGroundAPIManager: NSObject, URLSessionDownloadDelegate {
     
     // TODO: what do we do when the nsurl session transfer size is unknown?
     // TODO: lets display some info at least (MB)
+    // 2. Ok what is the transfer size is unknown? We can do a quick check using the typedef NSURLSessionTransferSizeUnknown:
+    if totalBytesExpectedToWrite == NSURLSessionTransferSizeUnknown {
+      let totalMegaBytesDownloaded = Double(totalBytesWritten) / 1000000.0
+      print("Unknown File Size, progress returned as 100%. Current total progress:\(totalMegaBytesDownloaded)")
+      self.downloadDelegate?.downloadProgress(downloadTask, progress: 100.0)
+      return
+    }
     
     // 1. Task: Calculater the % of the download completed from the totalBytesWrittn and the
     //    totalBytesExpectedToWrite (careful of when you perform your type casting..)
     let progress = (Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)) * 100.0
     self.downloadDelegate?.downloadProgress(downloadTask, progress: progress)
   }
-
+  
 }
